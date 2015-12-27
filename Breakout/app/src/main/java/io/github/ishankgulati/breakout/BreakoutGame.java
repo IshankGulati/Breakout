@@ -2,6 +2,7 @@ package io.github.ishankgulati.breakout;
 
 import android.app.Activity;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
@@ -29,7 +30,7 @@ public class BreakoutGame extends Activity{
         setContentView(breakoutView);
     }
 
-    private enum gameState{Playing, Paused, ShowingSplash, ShowingMenu, Exiting}
+    private enum gameState{Playing, Paused, ShowingSplash, ShowingMenu, Completed, Exiting}
     public static int screenX, screenY;
 
     BreakoutGame() {
@@ -39,6 +40,7 @@ public class BreakoutGame extends Activity{
         screenX = size.x;
         screenY = size.y;
     }
+
 
     public static class BreakoutView extends SurfaceView implements Runnable{
 
@@ -57,7 +59,8 @@ public class BreakoutGame extends Activity{
         private static GameObjectManager _gameObjectManager;
         private static SoundManager _soundManager;
         private static ScoreBoard _scoreBoard;
-        private static  MainMenu _mainMenu;
+        private static MainMenu _mainMenu;
+        private static InGameMenu _inGameMenu;
 
         Brick[] bricks;
         private static int numBricks;
@@ -73,6 +76,7 @@ public class BreakoutGame extends Activity{
             _gameObjectManager = new GameObjectManager();
             _soundManager = new SoundManager(context);
             _mainMenu = new MainMenu();
+            _inGameMenu = new InGameMenu();
 
             paddle = new Paddle();
             paddle.setInitialPosition(screenX / 2, screenY - 20);
@@ -85,15 +89,14 @@ public class BreakoutGame extends Activity{
             Brick[] bricks = new Brick[200];
             numBricks = 0;
 
-            createBricksAndRestart();
+            createBricks();
             _scoreBoard = new ScoreBoard(numBricks);
         }
 
 
         @Override
         public void run(){
-
-
+            _soundManager.playMusic();
             while(!isExiting()){
                 GameLoop();
             }
@@ -119,6 +122,9 @@ public class BreakoutGame extends Activity{
                 case Paused:
                     showInGameMenu();
                     break;
+                case Completed:
+                    showEndGame();
+                    break;
                 case Playing:
 
                     long startFrameTime = System.currentTimeMillis();
@@ -138,7 +144,7 @@ public class BreakoutGame extends Activity{
         }
 
         private void pause(){
-            _gameState = gameState.Paused;
+            _soundManager.player.release();
             try{
                 gameThread.join();
             }
@@ -148,10 +154,12 @@ public class BreakoutGame extends Activity{
         }
 
         private void resume(){
-            _gameState = gameState.Playing;
+
             gameThread = new Thread(this);
             gameThread.start();
         }
+
+
 
         @Override
         public boolean onTouchEvent(MotionEvent motionEvent){
@@ -184,10 +192,41 @@ public class BreakoutGame extends Activity{
                                         break;
                                     case Play:
                                         _gameState = gameState.Playing;
+                                        _soundManager.stopAllSounds();
                                         break;
                                 }
                             }
                         }
+                    }
+                    else if(_gameState == gameState.Paused){
+                        float xPos = motionEvent.getX();
+                        float yPos = motionEvent.getY();
+
+                        Iterator itr = _inGameMenu.getMenuItems().iterator();
+                        while(itr.hasNext()){
+                            InGameMenu.MenuItem button = (InGameMenu.MenuItem)itr.next();
+                            RectF b = button.rect;
+                            if(xPos > b.left && xPos < b.right && yPos > b.top && yPos < b.bottom){
+                                switch (button.action){
+                                    case Exit:
+                                        _gameState = gameState.Exiting;
+                                        break;
+                                    case Resume:
+                                        _gameState = gameState.Playing;
+                                        _soundManager.stopAllSounds();
+                                        break;
+                                    case Restart:
+                                        resetGame();
+                                        _gameState = gameState.Playing;
+                                        _soundManager.stopAllSounds();
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                    else if(_gameState == gameState.Completed){
+                        resetGame();
+                        _gameState = gameState.ShowingMenu;
                     }
                     break;
 
@@ -201,11 +240,12 @@ public class BreakoutGame extends Activity{
             return true;
         }
 
-        private void createBricksAndRestart(){
+        private void createBricks(){
             int brickWidth = screenX/8;
             int brickHeight = screenY/10;
             float x, y;
             int padding = 1;
+            numBricks = 0;
             for(int row = 0; row < 3; row++){
                 for(int column = 0; column < 8; column++){
                     bricks[numBricks] = new Brick();
@@ -234,7 +274,17 @@ public class BreakoutGame extends Activity{
         }
 
         public static void showInGameMenu(){
+            _soundManager.playMusic();
+            _inGameMenu.show(ourHolder, canvas, paint);
+        }
 
+        public static void showEndGame(){
+            if(ourHolder.getSurface().isValid()) {
+                canvas = ourHolder.lockCanvas();
+                canvas.drawColor(Color.argb(255, 26, 128, 182));
+                drawScoreBoard();
+                ourHolder.unlockCanvasAndPost(canvas);
+            }
         }
 
         public static GameObjectManager getObjectManager(){
@@ -245,8 +295,16 @@ public class BreakoutGame extends Activity{
             return _scoreBoard;
         }
 
+        public static SoundManager getSoundManager(){
+            return _soundManager;
+        }
+
         public static boolean checkVictory(){
-            return _scoreBoard.getGameResult() != ScoreBoard.GameResult.Playing;
+            if(_scoreBoard.getGameResult() != ScoreBoard.GameResult.Playing) {
+                _gameState = gameState.Completed;
+                return true;
+            }
+            return false;
         }
 
         public static int getNumberOfBricks(){

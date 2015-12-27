@@ -55,6 +55,7 @@ public class Ball extends VisibleGameObject{
             if(_angle >= 250.0f && _angle <= 290.0f){
                 _angle -= 30;
             }
+            BreakoutGame.BreakoutView.getSoundManager().playSound("beep3");
             /*
             if(left < 0){
                 clearObstacleX(2);
@@ -69,6 +70,8 @@ public class Ball extends VisibleGameObject{
         if(top < 0){
             yVelocity = -yVelocity;
             _angle = 360.0f - _angle;
+
+            BreakoutGame.BreakoutView.getSoundManager().playSound("beep2");
             //clearObstacleY(12);
         }
 
@@ -79,6 +82,7 @@ public class Ball extends VisibleGameObject{
             if(result){
                 return;
             }
+            BreakoutGame.BreakoutView.getSoundManager().playSound("loseLife");
             reset();
         }
 
@@ -92,6 +96,8 @@ public class Ball extends VisibleGameObject{
                     brick.setInvisible();
                     yVelocity = -yVelocity;
                     BreakoutGame.BreakoutView.getScoreBoard().incrementScore();
+
+                    BreakoutGame.BreakoutView.getSoundManager().playSound("explode");
                 }
             }
         }
@@ -140,6 +146,7 @@ public class Ball extends VisibleGameObject{
                         _angle -= 360.0f;
                     }
                 }
+                BreakoutGame.BreakoutView.getSoundManager().playSound("beep1");
                 _velocity += 2.0f;
             }
         }

@@ -6,6 +6,7 @@ import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.util.Log;
+import android.media.MediaPlayer;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SoundManager {
 
     SoundPool soundPool;
+    MediaPlayer player;
     int beep1ID = -1;
     int beep2ID = -1;
     int beep3ID = -1;
@@ -54,17 +56,30 @@ public class SoundManager {
             explodeID = soundPool.load(descriptor, 0);
             soundIds.put("explode", explodeID);
 
+            // Adding music
+            player = MediaPlayer.create(context, R.raw.soundtrack);
+            player.setLooping(true);
+
         }catch(IOException e){
             // Print an error message to the console
             Log.e("error", "failed to load sound files");
         }
     }
 
-    public void play(String name){
+    public void playSound(String name){
         int id = soundIds.get(name);
         soundPool.play(id, 1, 1, 0, 0, 1);
     }
 
+    public void playMusic(){
+        if(!player.isPlaying()) {
+            player.start();
+        }
+    }
+
     public void stopAllSounds(){
+        if(player.isPlaying()) {
+            player.stop();
+        }
     }
 }

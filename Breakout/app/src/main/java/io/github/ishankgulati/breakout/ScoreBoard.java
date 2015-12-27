@@ -32,12 +32,16 @@ public class ScoreBoard {
 
         if(result == GameResult.Win){
             paint.setTextSize(90);
-            canvas.drawText("YOU HAVE WON!", 10, screenY / 2, paint);
+            int yPos = (int)((canvas.getHeight() * 3 / 4) - ((paint.descent() + paint.ascent())/2));
+            canvas.drawText("YOU HAVE WON!", screenX / 2, screenY / 2, paint);
+            canvas.drawText("Press any key to continue", screenX / 2, yPos, paint);
         }
 
         if(result == GameResult.Lose){
             paint.setTextSize(90);
-            canvas.drawText("YOU HAVE LOST!", 10,screenY / 2, paint);
+            int yPos = (int)((canvas.getHeight() * 3 / 4) - ((paint.descent() + paint.ascent())/2));
+            canvas.drawText("YOU HAVE LOST!", screenX / 2,screenY / 2, paint);
+            canvas.drawText("Press any key to continue", screenX / 2, yPos, paint);
         }
     }
 

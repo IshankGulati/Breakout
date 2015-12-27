@@ -37,10 +37,10 @@ public class MainMenu {
 
         MenuItem exitButton = new MenuItem();
         exitButton.rect.left = 0;
-        exitButton.rect.top = screenY / 4 + screenY / 15;
-        exitButton.rect.bottom = screenY / 2 - screenY / 15;
+        exitButton.rect.top = screenY / 2 + screenY / 15;
+        exitButton.rect.bottom = screenY * 3 / 4 - screenY / 15;
         exitButton.rect.right = screenY;
-        exitButton.action = MenuResult.Play;
+        exitButton.action = MenuResult.Exit;
 
         _menuItems.addElement(playButton);
         _menuItems.addElement(exitButton);
