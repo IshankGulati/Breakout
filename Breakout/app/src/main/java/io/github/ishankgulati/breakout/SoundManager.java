@@ -36,23 +36,23 @@ public class SoundManager {
             AssetFileDescriptor descriptor;
 
             // Load our fx in memory ready for use
-            descriptor = assetManager.openFd("beep1.ogg");
+            descriptor = assetManager.openFd("beep1.wav");
             beep1ID = soundPool.load(descriptor, 0);
             soundIds.put("beep1", beep1ID);
 
-            descriptor = assetManager.openFd("beep2.ogg");
+            descriptor = assetManager.openFd("beep2.wav");
             beep2ID = soundPool.load(descriptor, 0);
             soundIds.put("beep2", beep2ID);
 
-            descriptor = assetManager.openFd("beep3.ogg");
+            descriptor = assetManager.openFd("beep3.wav");
             beep3ID = soundPool.load(descriptor, 0);
             soundIds.put("beep3", beep3ID);
 
-            descriptor = assetManager.openFd("loseLife.ogg");
+            descriptor = assetManager.openFd("loseLife.wav");
             loseLifeID = soundPool.load(descriptor, 0);
             soundIds.put("loseLife", loseLifeID);
 
-            descriptor = assetManager.openFd("explode.ogg");
+            descriptor = assetManager.openFd("explode.wav");
             explodeID = soundPool.load(descriptor, 0);
             soundIds.put("explode", explodeID);
 

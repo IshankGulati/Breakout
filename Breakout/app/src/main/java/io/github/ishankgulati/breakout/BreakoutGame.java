@@ -28,18 +28,24 @@ public class BreakoutGame extends Activity{
 
         breakoutView = new BreakoutView(this);
         setContentView(breakoutView);
-    }
 
-    private enum gameState{Playing, Paused, ShowingSplash, ShowingMenu, Completed, Exiting}
-    public static int screenX, screenY;
-
-    BreakoutGame() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         screenX = size.x;
         screenY = size.y;
     }
+
+    private enum gameState{Playing, Paused, ShowingSplash, ShowingMenu, Completed, Exiting}
+    public static int screenX, screenY;
+    /*
+    public BreakoutGame() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenX = size.x;
+        screenY = size.y;
+    }*/
 
 
     public static class BreakoutView extends SurfaceView implements Runnable{
