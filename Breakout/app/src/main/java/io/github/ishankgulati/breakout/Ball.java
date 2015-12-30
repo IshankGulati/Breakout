@@ -5,34 +5,45 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
+
 import java.util.Random;
 
 /**
  * Created by Hackbook on 12/26/2015.
  */
 public class Ball extends VisibleGameObject{
-    private float _velocity;
+    private float _velocity, initialVelocity;
     private float _angle;
     private int screenX, screenY;
-
+    private long elapsedTimeSinceStart;
+    private final long minCollisionInterval;
+    private long collisionTime;
     Ball(){
         setSize(10, 10);
-        _velocity = 300;
+        initialVelocity = 300;
+        _velocity = initialVelocity;
 
         Random generator = new Random();
         _angle = generator.nextInt(360);
         if(_angle >= 70.0f && _angle <= 110.0f){
-            _angle += 30;
+            _angle += 40;
         }
         if(_angle >= 250.0f && _angle <= 290.0f){
-            _angle -= 30;
+            _angle -= 40;
         }
-        screenX = BreakoutGame.screenX;
-        screenY = BreakoutGame.screenY;
+        screenX = BreakoutGame.BreakoutView.screenX;
+        screenY = BreakoutGame.BreakoutView.screenY;
+        elapsedTimeSinceStart = 0;
+        minCollisionInterval = 200;
+        collisionTime = 0;
     }
 
     @Override
-    public void update(long fps){
+    public void update(long fps, long elapsedTime){
+        elapsedTimeSinceStart += elapsedTime;
+        if(elapsedTimeSinceStart < 3000)
+            return;
+
         float xVelocity = _velocity * linearVelocityX(_angle);
         float yVelocity = _velocity * linearVelocityY(_angle);
 
@@ -41,20 +52,21 @@ public class Ball extends VisibleGameObject{
 
         float left = rect.left + (xVelocity / fps);
         float top = rect.top + (yVelocity / fps);
-        float right = rect.left + getWidth();
-        float bottom = rect.top + getHeight();
+        float right = rect.right + (xVelocity / fps);
+        float bottom = rect.bottom + (yVelocity / fps);
 
         // collision with right and left wall
-        if(left < 0 || right > screenX){
+        if(left <= 0 || right >= screenX){
             _angle = 360.0f - _angle;
             xVelocity = -xVelocity;
 
             if(_angle >= 70.0f && _angle <= 110.0f){
-                _angle += 30;
+                _angle += 40;
             }
             if(_angle >= 250.0f && _angle <= 290.0f){
-                _angle -= 30;
+                _angle -= 40;
             }
+
             BreakoutGame.BreakoutView.getSoundManager().playSound("beep3");
             /*
             if(left < 0){
@@ -67,16 +79,23 @@ public class Ball extends VisibleGameObject{
         }
 
         // collision with top
-        if(top < 0){
+        if(top <= 0){
             yVelocity = -yVelocity;
-            _angle = 360.0f - _angle;
+            _angle = 180.0f - _angle;
+
+            if(_angle < 0.0f){
+                _angle += 360.0f;
+            }
+            if(_angle > 360.0f){
+                _angle = _angle - 360.0f;
+            }
 
             BreakoutGame.BreakoutView.getSoundManager().playSound("beep2");
             //clearObstacleY(12);
         }
 
         // collision with bottom
-        if(bottom > screenY){
+        if(bottom >= screenY){
             BreakoutGame.BreakoutView.getScoreBoard().decrementLife();
             boolean result = BreakoutGame.BreakoutView.checkVictory();
             if(result){
@@ -95,8 +114,17 @@ public class Ball extends VisibleGameObject{
                 if(RectF.intersects(brick.getBoundingRect(), getBoundingRect())){
                     brick.setInvisible();
                     yVelocity = -yVelocity;
-                    BreakoutGame.BreakoutView.getScoreBoard().incrementScore();
 
+                    _angle = 180.0f - _angle;
+
+                    if(_angle < 0.0f){
+                        _angle += 360.0f;
+                    }
+                    if(_angle > 360.0f){
+                        _angle = _angle - 360.0f;
+                    }
+
+                    BreakoutGame.BreakoutView.getScoreBoard().incrementScore();
                     BreakoutGame.BreakoutView.getSoundManager().playSound("explode");
                 }
             }
@@ -105,11 +133,13 @@ public class Ball extends VisibleGameObject{
         // collision with paddle
         Paddle paddle = (Paddle) BreakoutGame.BreakoutView.getObjectManager().get("Paddle");
 
-        if(paddle != null){
+        collisionTime += elapsedTime;
+        if(paddle != null && collisionTime > minCollisionInterval){
             RectF paddleRect = paddle.getBoundingRect();
             if(RectF.intersects(paddleRect, getBoundingRect())){
                 yVelocity = -yVelocity;
-                if(paddleRect.top < getBoundingRect().top + getHeight()/2){
+
+                if(paddleRect.top + paddle.getHeight()/2 < getBoundingRect().bottom){
                     // collision at edge
                     _angle = 360.0f - _angle;
                 }
@@ -122,13 +152,14 @@ public class Ball extends VisibleGameObject{
                     _angle += 360.0f;
                 }
                 if(_angle > 360.0f){
-                    _angle = 360.0f - _angle;
+                    _angle = _angle - 360.0f;
                 }
-
+                clearObstacleY(paddle.getBoundingRect().top - 2);
+                /*
                 // If ball is inside paddle
                 if(getBoundingRect().top + getHeight() > paddle.getBoundingRect().top){
                     setPosition(getPosition().x, paddle.getBoundingRect().top - getWidth()/2 - 1);
-                }
+                }*/
 
                 // adding spin to ball
                 if(paddle.getMovementState() == Paddle.MovementState.Left){
@@ -143,19 +174,19 @@ public class Ball extends VisibleGameObject{
                     _angle += 30.0f;
 
                     if(_angle > 360.0f){
-                        _angle -= 360.0f;
+                        _angle = _angle - 360.0f;
                     }
                 }
                 BreakoutGame.BreakoutView.getSoundManager().playSound("beep1");
-                _velocity += 2.0f;
+                _velocity += 10.0f;
             }
+            collisionTime = 0;
         }
 
         rect.left = rect.left + (xVelocity / fps);
         rect.top = rect.top + (yVelocity / fps);
         rect.right = rect.left + getWidth();
         rect.bottom = rect.top + getHeight();
-
 
         setPosition(rect.left, rect.top);
     }
@@ -178,15 +209,16 @@ public class Ball extends VisibleGameObject{
 
     public void reset(){
         super.reset();
-        _velocity = 300;
+        _velocity = initialVelocity;
+        elapsedTimeSinceStart = 0;
 
         Random generator = new Random();
         _angle = generator.nextInt(360);
         if(_angle >= 70.0f && _angle <= 110.0f){
-            _angle += 30;
+            _angle += 40;
         }
         if(_angle >= 250.0f && _angle <= 290.0f){
-            _angle -= 30;
+            _angle -= 40;
         }
     }
 

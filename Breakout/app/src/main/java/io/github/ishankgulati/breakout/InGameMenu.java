@@ -3,6 +3,7 @@ package io.github.ishankgulati.breakout;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.SurfaceHolder;
 
@@ -16,18 +17,19 @@ public class InGameMenu {
     public enum InMenuResult { Exit, Resume, Restart }
 
     public class MenuItem{
-        public RectF rect;
+        public Rect rect;
         public InMenuResult action;
     }
     private Vector<MenuItem> _inMenuItems;
 
     InGameMenu(){
-        screenX = BreakoutGame.screenX;
-        screenY = BreakoutGame.screenY;
+        screenX = BreakoutGame.BreakoutView.screenX;
+        screenY = BreakoutGame.BreakoutView.screenY;
 
         _inMenuItems = new Vector<MenuItem>();
 
         MenuItem resumeButton = new MenuItem();
+        resumeButton.rect = new Rect();
         resumeButton.rect.left = 0;
         resumeButton.rect.top = screenY / 4 + screenY / 20;
         resumeButton.rect.bottom = screenY * 3 / 8 - screenY / 20;
@@ -35,22 +37,16 @@ public class InGameMenu {
         resumeButton.action = InMenuResult.Resume;
 
         MenuItem restartButton = new MenuItem();
+        restartButton.rect = new Rect();
         restartButton.rect.left = 0;
         restartButton.rect.top = screenY / 2 + screenY / 20;
         restartButton.rect.bottom = screenY * 5 / 8 - screenY / 20;
         restartButton.rect.right = screenY;
         restartButton.action = InMenuResult.Restart;
 
-        MenuItem exitButton = new MenuItem();
-        exitButton.rect.left = 0;
-        exitButton.rect.top = screenY * 3 / 4 + screenY / 20;
-        exitButton.rect.bottom = screenY * 7 / 8 - screenY / 20;
-        exitButton.rect.right = screenY;
-        exitButton.action = InMenuResult.Exit;
 
         _inMenuItems.addElement(resumeButton);
         _inMenuItems.addElement(restartButton);
-        _inMenuItems.addElement(exitButton);
     }
 
     public Vector<MenuItem> getMenuItems(){
@@ -71,9 +67,6 @@ public class InGameMenu {
 
             yPos = (int) ((screenY / 2) - ((paint.descent() + paint.ascent()) / 2));
             canvas.drawText("Restart", xPos, yPos, paint);
-
-            yPos = (int) ((screenY * 3 / 4) - ((paint.descent() + paint.ascent()) / 2));
-            canvas.drawText("Exit", xPos, yPos, paint);
 
             holder.unlockCanvasAndPost(canvas);
         }

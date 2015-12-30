@@ -16,13 +16,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SoundManager {
 
-    SoundPool soundPool;
-    MediaPlayer player;
+    public SoundPool soundPool;
+    public MediaPlayer player;
     int beep1ID = -1;
     int beep2ID = -1;
     int beep3ID = -1;
     int loseLifeID = -1;
     int explodeID = -1;
+    int winID = -1;
+    int loseID = -1;
+    int streamId = -1;
     private ConcurrentHashMap<String, Integer> soundIds;
 
     SoundManager(Context context){
@@ -56,6 +59,15 @@ public class SoundManager {
             explodeID = soundPool.load(descriptor, 0);
             soundIds.put("explode", explodeID);
 
+            descriptor = assetManager.openFd("win.wav");
+            winID = soundPool.load(descriptor, 0);
+            soundIds.put("win", winID);
+
+            descriptor = assetManager.openFd("lose.wav");
+            loseID = soundPool.load(descriptor, 0);
+            soundIds.put("lose", loseID);
+
+
             // Adding music
             player = MediaPlayer.create(context, R.raw.soundtrack);
             player.setLooping(true);
@@ -68,11 +80,12 @@ public class SoundManager {
 
     public void playSound(String name){
         int id = soundIds.get(name);
-        soundPool.play(id, 1, 1, 0, 0, 1);
+        streamId = soundPool.play(id, 1, 1, 0, 0, 1);
     }
 
+
     public void playMusic(){
-        if(!player.isPlaying()) {
+        if(!player.isPlaying()){
             player.start();
         }
     }
@@ -80,6 +93,12 @@ public class SoundManager {
     public void stopAllSounds(){
         if(player.isPlaying()) {
             player.stop();
+            try {
+                player.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        soundPool.stop(streamId);
     }
 }

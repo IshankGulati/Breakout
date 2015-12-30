@@ -12,37 +12,50 @@ public class Paddle extends VisibleGameObject {
 
     public enum MovementState{Right, Left, Stopped}
 
-    private float velocity;
+    private float velocity, initialVelocity;
     private MovementState movementState;
     private int screenX, screenY;
 
     Paddle(){
-        velocity = 350.0f;
+        initialVelocity = 380.0f;
+        velocity = initialVelocity;
         setSize(130, 20);
         movementState = MovementState.Stopped;
-        screenX = BreakoutGame.screenX;
-        screenY = BreakoutGame.screenY;
+        screenX = BreakoutGame.BreakoutView.screenX;
+        screenY = BreakoutGame.BreakoutView.screenY;
     }
 
     @Override
-    public void update(long fps){
+    public void update(long fps, long elapsedTime){
         PointF loc = getPosition();
-        /**
+
         // collision with left and right walls
-        if((loc.x < 0.0f && velocity < 0)|| (loc. x > screenX && velocity > 0)){
-            velocity = - velocity;
+        if(loc.x < 0.0f){
+            if(movementState == MovementState.Left){
+                velocity = 0;
+            }
+            else{
+                velocity = initialVelocity;
+            }
         }
-        */
+         if(loc. x + getWidth() > screenX){
+             if(movementState == MovementState.Right){
+                 velocity = 0;
+             }
+             else{
+                 velocity = initialVelocity;
+             }
+         }
+
         if(movementState == MovementState.Right){
             loc.x = loc.x + velocity / fps;
         }
 
-        if(movementState == MovementState.Left){
+        if (movementState == MovementState.Left){
             loc.x = loc.x - velocity / fps;
         }
 
         setPosition(loc.x, loc.y);
-        setBoundingRect(loc.x);
     }
 
     public void setMovementState(MovementState state){
@@ -64,6 +77,7 @@ public class Paddle extends VisibleGameObject {
 
     public void reset(){
         super.reset();
+        velocity = initialVelocity;
         movementState = MovementState.Stopped;
     }
 }

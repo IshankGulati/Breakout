@@ -39,15 +39,15 @@ public class GameObjectManager {
                 VisibleGameObject value = entry.getValue();
                 value.draw(canvas, paint);
             }
-            BreakoutGame.BreakoutView.drawScoreBoard();
+            BreakoutGame.BreakoutView.drawScoreBoard(canvas, paint);
             ourHolder.unlockCanvasAndPost(canvas);
         }
     }
 
-    public void updateAll(long fps){
+    public void updateAll(long fps, long elapsedTime){
         for(ConcurrentHashMap.Entry<String, VisibleGameObject> entry : gameObjects.entrySet()){
             VisibleGameObject value = entry.getValue();
-            value.update(fps);
+            value.update(fps, elapsedTime);
         }
     }
 

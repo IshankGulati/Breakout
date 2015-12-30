@@ -31,6 +31,8 @@ public class VisibleGameObject {
     public void setInitialPosition(float x, float y){
         this.x = x; initialX = x;
         this.y = y; initialY = y;
+        RectF temp = new RectF(x, y, x+width, y+height);
+        setBoundingRect(temp);
     }
 
     public void setSize(float width, float height){
@@ -79,6 +81,6 @@ public class VisibleGameObject {
         return rect;
     }
 
-    public void update(long fps){}
+    public void update(long fps, long elapsedTime){}
 
 }
