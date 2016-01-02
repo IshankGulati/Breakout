@@ -4,7 +4,7 @@ This is a Breakout game clone developed for android phones. You can find complet
 
 # How to run
 
-Install breakout.apk from APK file directory. Touch the left and right side of screen to move the paddle in the corresponding direction.
+Install breakout.apk from APK file directory. Touch the left or right side of screen to move the paddle in the corresponding direction.
 
 # Additional Dependencies
 
